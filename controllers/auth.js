@@ -1,5 +1,18 @@
 const bcrypt = require("bcryptjs");
+const nodemailer = require("nodemailer");
+
 const User = require("../models/user");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  host: "smtp.gmail.com",
+  auth: {
+    user: "nhthanhdn95@gmail.com",
+    pass: "whmo ztcg nigi fpwk",
+  },
+});
+
+//'whmo ztcg nigi fpwk'
 
 exports.getLogin = (req, res, next) => {
   let message = req.flash("error");
@@ -67,7 +80,10 @@ exports.postSignup = (req, res, next) => {
   User.findOne({ email: email })
     .then((userDoc) => {
       if (userDoc) {
-        req.flash("error", "Email exists already, please pick a different one.");
+        req.flash(
+          "error",
+          "Email exists already, please pick a different one."
+        );
         return res.redirect("/signup");
       }
       return bcrypt
@@ -82,6 +98,17 @@ exports.postSignup = (req, res, next) => {
         })
         .then((result) => {
           res.redirect("/login");
+          //
+          return transporter
+            .sendMail({
+              from: "nhthanhdn95@gmail.com",
+              to: email,
+              subject: "Signup succeeded",
+              html: "<h1>You successfully signed up!</h1>",
+            })
+            .catch((error) => {
+              console.log("error = ", error, "\n");
+            });
         });
     })
     .catch((err) => {
